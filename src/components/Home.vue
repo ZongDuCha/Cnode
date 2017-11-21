@@ -1,55 +1,100 @@
 <template>
   <div class="container">
-      <div class="top">
-          <div class="titles"><img src="../assets/logo.png" alt=""> Cnode</div>
-          <div class="page">
-              <li>全部</li>
-              <li>分享</li>
-              <li>问答</li>
-              <li>招聘</li>
-          </div>
-      </div>
-      <!-- //top -->
 
       <!-- conter -->
       <div class="conter">
             <li v-for="(list,key) in conton.data" :key="key">
-                <img :src="list.author.avatar_url" alt="">
-                <div class="time">{{list.create_at | formatDate}}</div>
+                <img :src="list.author.avatar_url" :alt="list.author.loginname" title="list.author.loginame">
+                <div class="good" v-show="list.good">精华</div>
+                <div class="tops" v-show="list.top">置顶</div>
+                <router-link to='https://www.baidu.com' class="title">{{list.title}}</router-link>
+                <div class="time">{{list.create_at | formatDate}}更新</div>
             </li>
       </div>
+      <div class="pagetions">
+          <a href="javascript:void(0)" @click="prev()">上一页</a>
+          <a href="javascript:void(0)" @click="next()">下一页</a>
+      </div>
+      <div class="scrolltop" @click="scrolltop">Top</div>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import axios from 'axios'
+import NProgress from 'nprogress'
+import store from '@/vuex/store'
+import { mapState,mapActions } from 'vuex'
 export default {
     name:'Home',
     data(){
         return {
-            conton: ''
+            _thisroll: 0
         }
     },
     methods:{
+        scrolltop(){
+            var i = this._thisroll
+            var setl = setInterval(() => {
+                i-= 60;
+                window.scrollTo(i,i)
+                i <= 0 ? clearInterval(setl) : '';
+            },0)
+        },
+        ...mapActions([
+            'prev',
+            'next'
+        ])
+    },
+    computed:{
+        ...mapState([
+            'conton'
+        ])
     },
     created(){
-        axios.get('https://cnodejs.org/api/v1/topics')
-            .then((response) => {
-                this.conton = response.data
-                console.log(this.conton)
-            })
-            .catch((error) => {
-                console.log(error)
-            })
+        this.$store.dispatch('refr','all')
+        window.onscroll = () => {
+            let _thists = document.querySelector('.top .titles')
+            let _thistop = document.querySelector('.scrolltop')
+            if(document.documentElement && document.documentElement.scrollTop){
+                this._thisroll = document.documentElement.scrollTop
+            }else{
+                this._thisroll = document.body.scrollTop
+            }
+            if(this._thisroll > 100){
+                _thists.style.display = 'none';_thistop.style.right = '10%'
+            }else{
+             _thists.style.display = 'block';_thistop.style.right = '-10%'
+            }
+        }
     },
     filters:{
         formatDate(data){
             var data  = new Date(data);
-            var year = data.getFullYear();
-            console.log(time)
-            var moth = data.getMonth()+1;
-            var time = data.getDate();
-            return `${year}-${moth}-${time}`;
+            var time = new Date().getTime() - data.getTime()
+            if (time < 0) {
+            return ''
+          } else if ((time / 1000 < 30)) {
+            return '刚刚'
+
+          } else if (time / 1000 < 60) {
+            return parseInt((time / 1000)) + '秒前'
+
+          } else if ((time / 60000) < 60) {
+            return parseInt((time / 60000)) + '分钟前'
+
+          } else if ((time / 3600000) < 24) {
+            return parseInt(time / 3600000) + '小时前'
+
+          } else if ((time / 86400000) < 31) {
+            return parseInt(time / 86400000) + '天前'
+
+          } else if ((time / 2592000000) < 12) {
+            return parseInt(time / 2592000000) + '月前'
+
+          } else {
+            return parseInt(time / 31536000000) + '年前'
+
+          }
         }
     }
 }
@@ -60,63 +105,98 @@ body{
     margin:0;padding:0;
     width:100%;height:auto;
 }
+@mixin postion(){
+    font-size: 0.07rem;
+    padding: 0.1rem 0.3rem;
+    bottom: 0.4rem;
+    position: absolute;
+    color: #fff;
+    border-radius: 0.2rem;
+}
 
 .container{
+    .pagetions{
+        padding: 0.7rem;
+        
+        a{
+        font-size: 0.9rem;
+        background: #4487dc;
+        color: #fff;
+        padding: 0.3rem 0.7rem;
+        border-radius: 0.3rem;
+        margin-left: 5%;
+
+            &:nth-child(2){
+                float: right;
+                margin-right:5%;
+            }
+        }
+    }
+
+    .scrolltop{
+        position: fixed;
+        right: -10%;
+        bottom: 8%;
+        border-radius: 50%;
+        border: 1px solid #01d483;
+        width: 1.6rem;
+        height: 1.6rem;
+        padding: 0.3rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+        line-height: 1.6rem;
+        color: #01d483;
+        z-index: 2;
+        background: #fff;
+        text-shadow: 0 1px 1px #afaaaae3;
+    }
     .conter{
+        margin-top:5rem;
 
         li{
                 width: 98%;
                 height: 5.5rem;
                 position: relative;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px dashed #ddddddba;
                 margin: 0 auto;
 
-            img{
-                    border-radius: 50%;
-                    width:2.7rem;
+            .good{
+                    @include postion();
+                    background: #38d044;
+                    width: 1.5rem;
+                    right: 6.5rem;
+            }
+
+            .tops{
+                    @include postion();
+                    background: #38d044;
+                    width: 1.5rem;
+                    right: 9.5rem;
+            }
+
+            .title{
                     position: absolute;
-                    top: 0.8rem;
-                    left: 0.8rem;
-                    box-shadow: 0 1px 4px #ccc;
+                    font-size: 0.85rem;
+                    width: 81%;
+                    top: 0.5rem;
+                    left: 4.3rem;
+                    letter-spacing: 0.05rem;
+            }
+
+            img{
+                        border-radius: 10%;
+                        width: 3.5rem;
+                        position: absolute;
+                        top: 1rem;
+                        left: 0.2rem;
+                        -webkit-box-shadow: 0 1px 4px #ccc;
+                        box-shadow: 0 1px 4px #ccc;
             }
 
             .time{
-                    font-size: 0.8rem;
-                    position: absolute;
+                    @include postion();
                     right: 0.7rem;
-                    bottom: 0.7rem;
-            }
-        }
-    }
-
-    .top{
-        width: 100%;
-        height:auto;
-        background: #579ffb;
-
-        .titles{
-                   text-align: center;
-                    height: 3.2rem;
-                    color: #fff;
-                    line-height: 2.5rem;
-                    font-size: 1.5rem;
-
-                img{
-                    vertical-align:middle;
-                    max-height:60%;
-                }
-        }
-
-        // page
-        .page{
-            width:100%;
-            height: auto;
-            padding-bottom:0.5rem;
-            overflow: hidden;
-
-            li{
-                float: left;color:#fff;list-style: none;
-                width: 25%;text-align: center;
+                    background: #4e81f7;
             }
         }
     }
