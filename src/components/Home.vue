@@ -7,7 +7,7 @@
                 <img :src="list.author.avatar_url" :alt="list.author.loginname" title="list.author.loginame">
                 <div class="good" v-show="list.good">精华</div>
                 <div class="tops" v-show="list.top">置顶</div>
-                <router-link to='https://www.baidu.com' class="title">{{list.title}}</router-link>
+                <router-link @click="show = false" :to="{ path: 'Content', query: {id:list.id}}" class="title" :title="list.title">{{list.title}}</router-link>
                 <div class="time">{{list.create_at | formatDate}}更新</div>
             </li>
       </div>
@@ -20,15 +20,14 @@
 </template>
 
 <script>
-import axios from 'axios'
-import NProgress from 'nprogress'
 import store from '@/vuex/store'
 import { mapState,mapActions } from 'vuex'
 export default {
     name:'Home',
     data(){
         return {
-            _thisroll: 0
+            _thisroll: 0,
+            show:true
         }
     },
     methods:{
@@ -60,10 +59,13 @@ export default {
             }else{
                 this._thisroll = document.body.scrollTop
             }
-            if(this._thisroll > 100){
-                _thists.style.display = 'none';_thistop.style.right = '10%'
-            }else{
-             _thists.style.display = 'block';_thistop.style.right = '-10%'
+            
+            if(this.show){
+                if(this._thisroll > 100 || _thists == true){
+                    _thists.style.display = 'none';_thistop.style.right = '10%'
+                }else{
+                    _thists.style.display = 'block';_thistop.style.right = '-10%'
+                }
             }
         }
     },
@@ -181,6 +183,7 @@ body{
                     top: 0.5rem;
                     left: 4.3rem;
                     letter-spacing: 0.05rem;
+                    color:#000;
             }
 
             img{

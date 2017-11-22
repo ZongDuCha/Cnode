@@ -41,7 +41,7 @@ export default {
     position: fixed;
     top:0;left:0;
     z-index: 2;
-    box-shadow: 0 2px 5px #c3bdbd;
+    box-shadow: 0 2px 5px #d8d6d6;
 
     .titles{
                 text-align: center;

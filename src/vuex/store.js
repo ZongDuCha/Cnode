@@ -6,7 +6,8 @@ import NProgress from 'nprogress'
 Vue.use(Vuex)
 const state = {
     all:'',
-    conton: '',
+    conton: '1',
+    contentl: '',
     tab: 'all',
     className: 'all',
     num: 1
@@ -68,6 +69,19 @@ const mutations = {
                 console.log(err)
             })
         }
+    },
+    // Content
+    content(state, type){
+        NProgress.start()
+        // axios.get('https://cnodejs.org/api/v1/topic/' + type)
+        // .then(response => {
+        //     state.contentl = response.data
+        //     console.log(11)
+        //     NProgress.done()
+        // })
+        // .catch(err => {
+        //     console.log(err)
+        // })
     }
 }
 
@@ -80,6 +94,10 @@ const actions = {
     },
     next({commit}){
         commit('next')
+    },
+    // content
+    content({commit},type){
+        commit('content',type)
     }
 }
 
