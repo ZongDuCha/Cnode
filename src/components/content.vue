@@ -5,43 +5,49 @@
           <div class="logo"><img src="../assets/logo.png" alt=""></div>
     </div>
 
-      <div class="titles">
+      <div class="titles" v-if="contentl">
           <div class="label">
-              <h2>{{contonsl.title}}</h2>
-              <!-- <a href="###">{{contonsl.author.loginname}}</a> -->
-              <span v-if="contonsl.top">置顶</span>
-              <span v-if="contonsl.good">精华</span>
-              <span v-if="contonsl.tab === 'share'">分享</span>
-              <span v-if="contonsl.tab === 'ask'">回答</span>
-              <span v-if="contonsl.tab === 'job'">招聘</span>
-              
+              <h2>{{contentl.title}}</h2>
+              <a href="###">{{contentl.author.loginname}}</a>
+              <span v-if="contentl.top">置顶</span>
+              <span v-if="contentl.good">精华</span>
+              <span v-if="contentl.tab === 'share'">分享</span>
+              <span v-if="contentl.tab === 'ask'">回答</span>
+              <span v-if="contentl.tab === 'job'">招聘</span>
           </div>
           
           <!-- namelogo -->
           <div class="namelogo">
-              <img :src="contonsl.author.avatar_url" >
+              <img :src="contentl.author.avatar_url" >
               <!-- 日期 -->
-              <span>{{contonsl.create_at | formtime}}</span>
+              <span>{{contentl.create_at | formtime}}</span>
 
               <!-- 回复数 -->
-              <span><img src="../assets/1.png" alt="">{{contonsl.visit_count}}</span>
+              <span><img src="../assets/1.png" alt="">{{contentl.visit_count}}</span>
 
               <!-- 访问数 -->
-              <span><img src="../assets/2.png" alt="">{{contonsl.reply_count}}</span>
+              <span><img src="../assets/2.png" alt="">{{contentl.reply_count}}</span>
 
-                <!-- 收藏 -->
-              <div class="coll">收藏</div>
+              <!-- 收藏 -->
+              <div class="coll" @click="coll">收藏{{contentl.is_collect}}</div>
           </div>
       </div>
-
-      <div class="namecon" v-html="contonsl.content">
-          {{contonsl.content}}
+      <div class="namecon" v-html="contentl.content">
+          {{contentl.content}}
       </div>
 
         <!-- 评价 -->
-        <div class="evea">
-          <h4>评价（{{Info.length}}）</h4>
-          <li v-for="(infor,key) in Info" :key="key">
+        <div class="evea" v-if="contentl.replies">
+          <h4>评价（{{contentl.replies.length}}）</h4>
+          <!-- 输入框 -->
+          <div class="nameping" v-if="$store.state.usertoken">
+              <img :src="usercont.userurl" alt="">
+              <textarea name="" id="" cols="30" v-model="$store.state.val" rows="10"></textarea>
+              <div style="display:block">
+                  <button @click="push($store.state.val)">发送</button>
+              </div>
+          </div>
+          <li v-for="(infor,key) in contentl.replies" :key="key">
                 <img :src="infor.author.avatar_url" :alt="infor.author.loginname">
 
                 <!-- 名字 -->
@@ -54,10 +60,14 @@
                 <div class="lou">{{key+1}} 楼</div>
 
                 <!-- 回复 -->
-                <div class="inda"><div>回复　</div>赞：{{infor.ups.length}}</div>
-
+                <div class="inda"><div @click="rep != key ? (rep = key,repshow = true) : (rep = '-1',repshow = false)">回复　</div>赞：{{infor.ups.length}}</div>
+                
                 <!-- 内容 -->
                 <div class="incont" v-html="infor.content">{{infor.content}}</div>
+                <div class="rep" v-if="(key == rep) && repshow">
+                    <textarea name="" id="" cols="30" rows="10"></textarea>
+                    <button>回复</button>
+                </div>
           </li>
         </div>
 
@@ -66,28 +76,30 @@
 
 <script>
 import store from '@/vuex/store'
-import { mapState } from 'vuex'
-import axios from 'axios'
+import { mapState,mapActions,mapGetters } from 'vuex'
 export default {
     name: 'content',
     data(){
-      return{
-        contonsl: {
-            author:{}
-        },
-        Info: ''
-      }
+        return{
+            rep: '-1',
+            repshow: false
+        }
+    },
+    computed:{
+        ...mapState([
+            'contentl',
+            'usercont'
+        ])
+    },
+    methods:{
+        ...mapActions([
+            'coll',
+            'push'
+        ])
     },
     created(){
-        // this.$store.dispatch('content',this.$route.query.id)
-        axios.get('https://cnodejs.org/api/v1/topic/' + this.$route.query.id)
-          .then(response => {
-             this.Info = response.data.data.replies
-             this.contonsl = response.data.data
-          })
-          .catch(err => {
-              console.log(err)
-          })
+          this.$store.dispatch('cont',this.$route.query.id)
+          this.$store.dispatch('login')
     },
     filters:{
         formtime(data){
@@ -118,11 +130,6 @@ export default {
 
             }
         }
-    },
-    computed:{
-        ...mapState([
-          'contentl'
-        ])
     }
 }
 </script>
@@ -130,7 +137,7 @@ export default {
 <style lang='scss'>
 
 .content-fluid{
-        background: #fff;
+    background: #fff;
     position: absolute;
     z-index: 2;
     width: 100%;
@@ -143,7 +150,42 @@ export default {
             padding: 0.2rem;
             margin-top: 2rem;  
 
-            li{
+            .nameping{
+                margin-top:0.3rem;
+                overflow: hidden;
+
+                img{
+                    border-radius: 50%;
+                    border: 1px solid #ddd;
+                    width: 3rem;
+                    vertical-align: middle;
+                    margin: 1rem;
+                    float: left;
+                }
+
+                textarea{
+                    float: left;
+                    width: 78%;
+                    border-radius: 0.3rem;
+                   font-size: 1.2rem;
+                }
+
+                >div{
+
+                    button{
+                            float: right;
+                            padding: 0.4rem 1rem;
+                            border-radius: 0.5rem;
+                            background: #579ffb;
+                            color: #fff;
+                            border: 1px solid #579ffb;
+                            margin-right: 1rem;
+                            margin-top: 1rem;
+                    }
+                }
+            }
+
+            >li{
                 margin: 3rem 1rem;
                 height: auto;
                 display: flow-root;
@@ -152,6 +194,29 @@ export default {
                 box-sizing: border-box;
                 padding: 0.5rem;
 
+                li{
+                    display: block;
+                    list-style-type: disc;
+                    margin: 0.7rem;
+                }
+
+                .rep{
+                    width:100%;
+
+                    textarea{
+                        width: 100%;
+                        margin: 1rem 0;
+                    }
+                    
+                    button{
+                            float: right;
+                            border: 1px solid #4892f1;
+                            border-radius: 0.2rem;
+                            background: #579ffb;
+                            color: #fff;
+                            padding: 0.2rem 1rem;
+                    }
+                }
 
                 img{
                     width:3rem;
