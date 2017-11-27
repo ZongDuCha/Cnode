@@ -21,4 +21,14 @@ export default {
 html,body{
   height: 100%;width: 100%;margin:0;padding:0;
 }
+.menu-fade-enter-active {
+  transition: all 150s ease;
+}
+.menu-fade-leave-active {
+  transition: all 150s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.menu-fade-enter, .menu-fade-leave-to {
+  transform: translateX(1000px);
+  opacity: 0;
+}
 </style>

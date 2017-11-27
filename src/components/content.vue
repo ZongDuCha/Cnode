@@ -1,9 +1,6 @@
 <template>
   <div class="content-fluid">
-      <div class="back">
-          <router-link to="/"><img src="../assets/4.png" alt=""></router-link>
-          <div class="logo"><img src="../assets/logo.png" alt=""></div>
-    </div>
+      <Top/>
 
       <div class="titles" v-if="contentl">
           <div class="label">
@@ -29,7 +26,9 @@
               <span><img src="../assets/2.png" alt="">{{contentl.reply_count}}</span>
 
               <!-- 收藏 -->
-              <div class="coll" @click="coll">收藏{{contentl.is_collect}}</div>
+              <div class="coll" v-if="contentl.is_collect" @click="collrs">取消收藏</div>
+              <div class="coll" @click="coll" v-if="!contentl.is_collect">收藏</div>
+
           </div>
       </div>
       <div class="namecon" v-html="contentl.content">
@@ -60,13 +59,13 @@
                 <div class="lou">{{key+1}} 楼</div>
 
                 <!-- 回复 -->
-                <div class="inda"><div @click="rep != key ? (rep = key,repshow = true) : (rep = '-1',repshow = false)">回复　</div>赞：{{infor.ups.length}}</div>
+                <div class="inda"><div @click="rep != key ? (rep = key,repshow = true) : (rep = '-1',repshow = false);valtice(infor.author.loginname)">回复　</div>赞：{{infor.ups.length}}</div>
                 
                 <!-- 内容 -->
                 <div class="incont" v-html="infor.content">{{infor.content}}</div>
                 <div class="rep" v-if="(key == rep) && repshow">
-                    <textarea name="" id="" cols="30" rows="10"></textarea>
-                    <button>回复</button>
+                    <textarea name="" id="" cols="30" rows="10" v-model="$store.state.valticel"></textarea>
+                    <button @click="lowshow([infor.author.loginname,key])">回复</button>
                 </div>
           </li>
         </div>
@@ -76,7 +75,8 @@
 
 <script>
 import store from '@/vuex/store'
-import { mapState,mapActions,mapGetters } from 'vuex'
+import Top from './Top'
+import { mapState,mapActions,mapGetters,mapMutations } from 'vuex'
 export default {
     name: 'content',
     data(){
@@ -91,15 +91,23 @@ export default {
             'usercont'
         ])
     },
+    components:{Top},
     methods:{
         ...mapActions([
             'coll',
-            'push'
-        ])
+            'push',
+            'valtice',
+            'collrs'
+        ]),
+        ...mapMutations([
+            'lowshow'
+        ]),
+        rougo(){
+            this.$router.back(-1)
+        }
     },
     created(){
           this.$store.dispatch('cont',this.$route.query.id)
-          this.$store.dispatch('login')
     },
     filters:{
         formtime(data){
@@ -165,7 +173,7 @@ export default {
 
                 textarea{
                     float: left;
-                    width: 78%;
+                    width: 70%;
                     border-radius: 0.3rem;
                    font-size: 1.2rem;
                 }
@@ -267,7 +275,7 @@ export default {
             padding: 0.5rem;
             text-align: center;
 
-            a{
+            .rout{
                 height:100%;
                 float: left;
                 line-height: 2rem;
@@ -428,7 +436,7 @@ export default {
       }
     }
     a{
-        color:#4487dc;    font-size: 0.9rem;display:inline-block;
+        color:#4487dc;display:inline-block;
       }
 }
 </style>

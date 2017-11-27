@@ -16,7 +16,17 @@ const state = {
     // 收藏
     collshow: '',
     // textarea
-    val: ''
+    val: '',
+    // 回复某人
+    valticel: '',
+    lotshw: '',
+    // 发表文章
+    titles: '',
+    centont: '',
+    seltiv: 'dev',
+    menu: false
+    // 个人中心
+
 }
 
 const mutations = {
@@ -76,10 +86,12 @@ const mutations = {
             })
         }
     },
+    // 收藏
     coll(state,type){
         if(!state.usercont){
             console.log('请登录')
         }else{
+            NProgress.start();
             axios.post('https://cnodejs.org/api/v1/topic_collect/collect',{
                 accesstoken: state.usercont.token,
                 topic_id: state.contentl.id
@@ -87,15 +99,35 @@ const mutations = {
             .then(response => {
                 state.usercont.is_collect = response.data
                 state.contentl.is_collect = true
-                console.log(state.usercont)
+                NProgress.done()
+            })
+        }
+    },
+    // 取消收藏
+    collrs(state,type){
+        console.log(type)
+        if(!state.usercont){
+            console.log('请登录')
+        }else{
+            NProgress.start();
+            axios.post('https://cnodejs.org/api/v1/topic_collect/collect',{
+                accesstoken: state.usercont.token,
+                topic_id: state.contentl.id
+            })
+            .then(response => {
+                state.usercont.is_collect = response.data
+                state.contentl.is_collect = false
+                NProgress.done()
             })
         }
     },
     // cont
     cont(state,type){
+        state.urlid = type
         axios.get('https://cnodejs.org/api/v1/topic/' + type)
         .then(response => {
            state.contentl = response.data.data
+           NProgress.done()
         })
         .catch(err => {
             console.log(err)
@@ -103,7 +135,7 @@ const mutations = {
     },
     // login
     login(state){
-        // ba178155-5adf-471a-a5fb-9a1b394b47bc
+        NProgress.start();
         axios.post('https://cnodejs.org/api/v1/accesstoken',{
             accesstoken: state.usertoken
         })
@@ -115,21 +147,72 @@ const mutations = {
                 token:state.usertoken
            }
            sessionStorage.user = JSON.stringify(state.usercont)
+           NProgress.done()
         })
         .catch(err => {
             console.log(err)
         })
     },
-    // 发表
+    // 回复帖子
     push(state,type){
+        NProgress.start();
         axios.post('https://cnodejs.org/api/v1//topic/' + state.contentl.id + '/replies',{
             accesstoken: state.usertoken,
             content: type
         })
         .then(response => {
             state.val = ''
-            axios.post('')
+            axios.get('https://cnodejs.org/api/v1/topic/' + state.contentl.id)
+            .then(response => {
+                state.contentl.replies = response.data.data.replies
+                NProgress.done()
+            })
+            .catch(err => {
+                console.log(err)
+            })
         })
+    },
+    // 回复某人
+    valtice(state,type){
+        state.valticel = '@' + type
+    },
+    lowshow(state,type){
+        let index = type[1] 
+            if(type[0] === state.contentl.replies[index].author.loginname){
+                state.lotshw = state.contentl.replies[index].id
+            }
+        NProgress.start();
+        axios.post('https://cnodejs.org/api/v1//topic/' + state.contentl.id + '/replies',{
+            accesstoken: state.usertoken,
+            content: state.valticel,
+            reply_id: state.lotshw
+        })
+        // 显示403表示拒绝访问，而不是代码问题
+        .then(response => {
+            console.log('ok')
+            NProgress.done()
+        })
+        .catch(err => {
+            console.log('ok')
+        })
+    },
+    // 发表文章
+    pushtab(state,type){
+        axios.post('https://cnodejs.org/api/v1/topics',{
+            accesstoken: state.usertoken,
+            title:state.titles,
+            tab: state.seltiv,
+            content: state.centont
+        })
+        .then(response => {
+            state.titles = state.centont = ''
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    },
+    admin(state,type){
+        console.log(type)
     }
 }
 
@@ -161,6 +244,18 @@ const actions = {
         }else{
             commit('push',type)
         }
+    },
+    valtice({commit},type){
+        commit('valtice',type)
+    },
+    collrs({commit},type){
+        commit('collrs',type)
+    },
+    pushtab({commit}){
+        commit('pushtab')
+    },
+    admin({commit},type){
+        commit('admin',type)
     }
 }
 

@@ -7,7 +7,7 @@ import NProgress from 'nprogress'
 import store from './vuex/store'
 import 'nprogress/nprogress.css'
 
-Vue.use(NProgress)
+Vue.use(NProgress,router)
 Vue.config.productionTip = false
 NProgress.configure({showSpinner: false})
 /* eslint-disable no-new */
