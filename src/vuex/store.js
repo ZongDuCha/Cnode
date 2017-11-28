@@ -11,7 +11,7 @@ const state = {
     tab: 'all',
     className: 'all',
     num: 1,
-    usertoken: 'ba178155-5adf-471a-a5fb-9a1b394b47bc',
+    // usertoken: 'ba178155-5adf-471a-a5fb-9a1b394b47bc',
     usercont: {},
     // 收藏
     collshow: '',
@@ -24,9 +24,9 @@ const state = {
     titles: '',
     centont: '',
     seltiv: 'dev',
-    menu: false
+    menu: false,
     // 个人中心
-
+    persName: {}
 }
 
 const mutations = {
@@ -134,24 +134,57 @@ const mutations = {
         })
     },
     // login
-    login(state){
+    login(state,type){
         NProgress.start();
         axios.post('https://cnodejs.org/api/v1/accesstoken',{
-            accesstoken: state.usertoken
+            accesstoken: type
         })
         .then(response => {
            state.usercont = {
                 username:response.data.loginname,
                 userurl:response.data.avatar_url,
                 userid:response.data.id,
-                token:state.usertoken
+                token:type
            }
+
+           axios.get('https://cnodejs.org/api/v1/user/' + state.usercont.username)
+           .then(res => {
+               state.persName = res.data.data
+               console.log(state.persName)
+           })
+           .catch(err => {
+               console.log(err)
+           })
+
            sessionStorage.user = JSON.stringify(state.usercont)
            NProgress.done()
+
+           
         })
         .catch(err => {
             console.log(err)
         })
+
+        
+    },
+    // 个人中心
+    pers(state){
+        NProgress.start()
+        console.log(state.usercont)
+        // axios.get('https://cnodejs.org/api/v1/user/' + state.usercont.username)
+        // .then(res => {
+        //     console.log('ok')
+        // })
+        // .catch(err => {
+        //     console.log(err)
+        // })
+    },
+    refr(state,type){
+        state.usercont = type
+    },
+    clear(state){
+        sessionStorage.clear()
+        window.location.reload()
     },
     // 回复帖子
     push(state,type){
@@ -210,9 +243,6 @@ const mutations = {
         .catch(err => {
             console.log(err)
         })
-    },
-    admin(state,type){
-        console.log(type)
     }
 }
 
@@ -235,8 +265,8 @@ const actions = {
         commit('cont',type)
     },
     // login
-    login({commit}){
-        commit('login')
+    login({commit},type,state){
+        commit('login',type)
     },
     push({commit},type){
         if(type == ''){
@@ -254,8 +284,11 @@ const actions = {
     pushtab({commit}){
         commit('pushtab')
     },
-    admin({commit},type){
-        commit('admin',type)
+    refr({commit},type){
+        commit('refr',type)
+    },
+    clear({commit}){
+        commit('clear')
     }
 }
 

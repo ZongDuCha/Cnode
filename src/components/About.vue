@@ -22,7 +22,7 @@ export default {
     line-height: 1.3rem;
     
     p{
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
     }
 }
 </style>
