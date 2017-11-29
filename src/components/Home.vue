@@ -79,7 +79,6 @@ export default {
             //     }
             // }
         }
-        this.$store.dispatch('login')
     },
     filters:{
         formatDate(data){

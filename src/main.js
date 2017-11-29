@@ -13,7 +13,7 @@ NProgress.configure({showSpinner: false})
 
 // 处理刷新的时候vuex被清空但是用户已经登录的情况
 if (sessionStorage.user) {
-  store.dispatch('refr', JSON.parse(sessionStorage.user))
+  store.dispatch('session', JSON.parse(sessionStorage.user))
 }
 
 

@@ -43,7 +43,7 @@ export default {
                 },
                 {
                     'name': '消息',
-                    'path': '/'
+                    'path': '/Dope'
                 },
                 {
                     'name': '个人中心',
@@ -134,6 +134,7 @@ export default {
                 line-height: 2.5rem;
                 font-size: 1.5rem;
                 position: relative;
+                padding-bottom: 0.2rem;
 
             img{
                 vertical-align:middle;

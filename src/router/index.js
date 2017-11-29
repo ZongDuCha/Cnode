@@ -5,6 +5,8 @@ import Content from '@/components/Content'
 import Slishow from '@/components/Slishow'
 import About from '@/components/About'
 import Pers from '@/components/Pers'
+import UserTion from '@/components/UserTion'
+import Dope from '@/components/Dope'
 
 Vue.use(Router)
 
@@ -34,6 +36,16 @@ export default new Router({
       path:'/Pers',
       name:'Pers',
       component:Pers
+    },
+    {
+      path:'/UserTion',
+      name:'UserTion',
+      component: UserTion
+    },
+    {
+      path:'/Dope',
+      name:'Dope',
+      component: Dope
     }
   ]
 })

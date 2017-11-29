@@ -39,7 +39,7 @@
         <div class="evea" v-if="contentl.replies">
           <h4>评价（{{contentl.replies.length}}）</h4>
           <!-- 输入框 -->
-          <div class="nameping" v-if="$store.state.usertoken">
+          <div class="nameping" v-if="$store.state.usercont.userid">
               <img :src="usercont.userurl" alt="">
               <textarea name="" id="" cols="30" v-model="$store.state.val" rows="10"></textarea>
               <div style="display:block">
@@ -101,10 +101,7 @@ export default {
         ]),
         ...mapMutations([
             'lowshow'
-        ]),
-        rougo(){
-            this.$router.back(-1)
-        }
+        ])
     },
     created(){
           this.$store.dispatch('cont',this.$route.query.id)

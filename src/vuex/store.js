@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import NProgress from 'nprogress'
+import NProgress from 'nProgress'
 
 Vue.use(Vuex)
 const state = {
@@ -26,11 +26,16 @@ const state = {
     seltiv: 'dev',
     menu: false,
     // 个人中心
-    persName: {}
+    persName: {coll:''},
+    // 个人文章详情
+    tionCont: '',
+    // 个人消息
+    messCont:''
 }
 
 const mutations = {
     refr(state,type){
+        console.log(type)
         NProgress.start();
         state.tab = state.className = type;
         axios.get('http://cnodejs.org/api/v1/topics' + '?tab=' + type)
@@ -105,7 +110,6 @@ const mutations = {
     },
     // 取消收藏
     collrs(state,type){
-        console.log(type)
         if(!state.usercont){
             console.log('请登录')
         }else{
@@ -146,18 +150,16 @@ const mutations = {
                 userid:response.data.id,
                 token:type
            }
+           sessionStorage.user = JSON.stringify(state.usercont)
+           NProgress.done()
 
            axios.get('https://cnodejs.org/api/v1/user/' + state.usercont.username)
            .then(res => {
                state.persName = res.data.data
-               console.log(state.persName)
            })
            .catch(err => {
                console.log(err)
            })
-
-           sessionStorage.user = JSON.stringify(state.usercont)
-           NProgress.done()
 
            
         })
@@ -170,16 +172,21 @@ const mutations = {
     // 个人中心
     pers(state){
         NProgress.start()
-        console.log(state.usercont)
-        // axios.get('https://cnodejs.org/api/v1/user/' + state.usercont.username)
-        // .then(res => {
-        //     console.log('ok')
-        // })
-        // .catch(err => {
-        //     console.log(err)
-        // })
+        function per(){
+            return axios.get('https://cnodejs.org/api/v1/user/' + state.usercont.username)
+        } 
+        function res(){
+            return axios.get('https://cnodejs.org/api/v1/topic_collect/' + state.usercont.username)
+        }
+
+        axios.all([per(),res()])
+        .then(axios.spread( (response,pseon) => {
+            state.persName = response.data.data
+            state.persName.coll = pseon.data
+            NProgress.done()
+        } ))
     },
-    refr(state,type){
+    session(state,type){
         state.usercont = type
     },
     clear(state){
@@ -190,7 +197,7 @@ const mutations = {
     push(state,type){
         NProgress.start();
         axios.post('https://cnodejs.org/api/v1//topic/' + state.contentl.id + '/replies',{
-            accesstoken: state.usertoken,
+            accesstoken: state.usercont.token,
             content: type
         })
         .then(response => {
@@ -222,7 +229,6 @@ const mutations = {
         })
         // 显示403表示拒绝访问，而不是代码问题
         .then(response => {
-            console.log('ok')
             NProgress.done()
         })
         .catch(err => {
@@ -231,14 +237,47 @@ const mutations = {
     },
     // 发表文章
     pushtab(state,type){
+        NProgress.start()
         axios.post('https://cnodejs.org/api/v1/topics',{
-            accesstoken: state.usertoken,
+            accesstoken: state.usercont.token,
             title:state.titles,
             tab: state.seltiv,
             content: state.centont
         })
         .then(response => {
             state.titles = state.centont = ''
+            NProgress.done()
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    },
+    tions(state,type){
+        switch(type){
+            case 'lies':
+            state.tionCont = state.persName.recent_replies
+            break;
+
+            case 'topics':
+            state.tionCont = state.persName.recent_topics
+            break;
+
+            case 'coll':
+            state.tionCont = state.persName.coll.data
+            console.log(state.tionCont)
+            break;
+        }
+    },
+    message(state){
+        NProgress.start()
+        axios.get('https://cnodejs.org/api/v1/messages',{
+            params:{
+                accesstoken:state.usercont.token
+            }
+        })
+        .then(res => {
+            state.messCont = res.data.data
+            NProgress.done()
         })
         .catch(err => {
             console.log(err)
@@ -284,11 +323,20 @@ const actions = {
     pushtab({commit}){
         commit('pushtab')
     },
-    refr({commit},type){
-        commit('refr',type)
+    session({commit},type){
+        commit('session',type)
     },
     clear({commit}){
         commit('clear')
+    },
+    pers({commit}){
+        commit('pers')
+    },
+    tions({commit},type){
+        commit('tions',type)
+    },
+    message({commit}){
+        commit('message')
     }
 }
 
